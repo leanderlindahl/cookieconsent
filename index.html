@@ -1,0 +1,53 @@
+<!DOCTYPE html>
+<html lang="en">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>Acceptera</title>
+    <link rel="stylesheet" href="css/style.css" />
+    <script src="js/acceptera.js"></script>
+  </head>
+  <body>
+    <div class="buttons">
+      <button id="category-1" data-consent-level="1" disabled>
+        Category 1
+      </button>
+      <button id="category-2" data-consent-level="2">Category 2</button>
+      <button id="category-3" data-consent-level="3">Category 3</button>
+      <button id="category-4" data-consent-level="4">Category 4</button>
+    </div>
+    <script type="text/plain" data-consent-category="1">
+      console.log('Cat 1 script, inline js');
+    </script>
+    <script
+      src="./js/test-cat-1.js"
+      type="text/javascript"
+      data-consent-category="1"
+    ></script>
+    <script type="text/plain" data-consent-category="2">
+      console.log('Cat 2 script, inline js');
+    </script>
+    <script
+      src="./js/test-cat-2.js"
+      type="text/plain"
+      data-consent-category="2"
+      async
+    ></script>
+    <script type="text/plain" data-consent-category="3">
+      console.log('Cat 3 script, inline js');
+    </script>
+    <script
+      src="./js/test-cat-3.js"
+      type="text/plain"
+      data-consent-category="3"
+    ></script>
+    <script type="text/plain" data-consent-category="4">
+      console.log('Cat 4 script, inline js');
+    </script>
+    <script
+      src="./js/test-cat-4.js"
+      type="text/plain"
+      data-consent-category="4"
+    ></script>
+  </body>
+</html>
