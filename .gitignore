@@ -1,6 +1,12 @@
+# Ignore some reference files
+js/js-addons.js
+js/onetrust.js
+
+# Ignore some standard ignore candidates
 .vscode/
 node_modules/
 build
 .DS_Store
 
+# Ignore .env
 .env

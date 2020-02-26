@@ -42,10 +42,11 @@
     );
 
     (window.ikea = window.ikea || {}).cookieConsent = cookieConsentObject;
-    console.log('cookieConsentObject.status', cookieConsentObject.status);
     var cookieSettingsEvent = new _customEvent('ikeaCookieConsent', {
       detail: cookieConsentObject.status
     });
+
+    // @TODO: write to cookie
     document.dispatchEvent(cookieSettingsEvent);
   }
 
@@ -69,7 +70,6 @@
   }
 
   function enableConsentedScripts(cookieConsentObject) {
-    console.log('parseForScripts', cookieConsentObject);
     Object.keys(cookieConsentObject).forEach(function(item) {
       var consentedScripts = document.querySelectorAll(
         'script[data-consent-category*="' + item + '"][type="text/plain"]'
@@ -87,10 +87,9 @@
 
   document.addEventListener('ikeaCookieConsent', consentChanged);
 
-  // Mockup buttons while developing
+  // Mockup button events while developing, will be replaced by preference center and banner buttons
   document.addEventListener('DOMContentLoaded', function() {
     setConsent();
-    console.log('status', ikea.cookieConsent.status);
     var buttons = document.querySelectorAll('.buttons button');
 
     Array.prototype.forEach.call(buttons, function(item) {
