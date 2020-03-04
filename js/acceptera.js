@@ -33,9 +33,10 @@
     };
     if (!cookieConsentObject.status.hasOwnProperty(category)) {
       cookieConsentObject.status[category] = true;
-    } else {
-      delete cookieConsentObject.status[category];
     }
+    // else {
+    //   delete cookieConsentObject.status[category];
+    // }
 
     cookieConsentObject.statusStringified = JSON.stringify(
       cookieConsentObject.status
@@ -45,8 +46,8 @@
     var cookieSettingsEvent = new _customEvent('ikeaCookieConsent', {
       detail: cookieConsentObject.status
     });
-
-    // @TODO: write to cookie
+    console.log('consent status is now:', cookieConsentObject.status);
+    // @TODO: write cookieConsentObject to a cookie
     document.dispatchEvent(cookieSettingsEvent);
   }
 
@@ -74,9 +75,7 @@
       var consentedScripts = document.querySelectorAll(
         'script[data-consent-category*="' + item + '"][type="text/plain"]'
       );
-      Array.prototype.forEach.call(consentedScripts, function(item) {
-        loadScript(item);
-      });
+      Array.prototype.forEach.call(consentedScripts, loadScript);
     });
   }
 
@@ -84,10 +83,47 @@
     var consentStatusObject = event.detail || { 1: true };
     enableConsentedScripts(consentStatusObject);
   }
-
   document.addEventListener('ikeaCookieConsent', consentChanged);
 
-  // Mockup button events while developing, will be replaced by preference center and banner buttons
+  /**
+   * Consent Settings Panel
+   */
+  document.body.addEventListener('click', toggleConsentSettingsPanel);
+  function toggleConsentSettingsPanel(event) {
+    if (event.target.className.indexOf('toggle-consent-settings') !== -1) {
+      document.querySelector('.modal').classList.toggle('visible');
+      document.querySelector('.modal-overlay').classList.toggle('visible');
+    }
+  }
+  document.body.addEventListener('click', consentToAll);
+  function consentToAll(event) {
+    if (event.target.id === 'acceptera-accept-all') {
+      console.log('Accept all was clicked');
+      var accepteraCategories = document.querySelectorAll(
+        '#acceptera-settings-panel input[type=checkbox]'
+      );
+      Array.prototype.forEach.call(accepteraCategories, function(item) {
+        setConsent(item.value);
+      });
+    }
+  }
+  // document.body.addEventListener('click', consentToSelected);
+  // function consentToSelected(event) {
+  //   if (event.target.id === 'acceptera-save-settings') {
+  //     console.log('Save settings was clicked');
+  //     var accepteraCategories = document.querySelectorAll(
+  //       '#acceptera-settings-panel input[type=checkbox]'
+  //     );
+  //     Array.prototype.forEach.call(accepteraCategories, function(item) {
+  //       setConsent(item.value);
+  //     });
+  //   }
+  // }
+
+  /**
+   * Mockup button events while developing,
+   * will be replaced by preference center and banner
+   */
   document.addEventListener('DOMContentLoaded', function() {
     setConsent();
     var buttons = document.querySelectorAll('.buttons button');
@@ -99,3 +135,8 @@
     });
   });
 })(window, document);
+
+/**
+ * References:
+ * https://css-tricks.com/considerations-styling-modal/
+ */

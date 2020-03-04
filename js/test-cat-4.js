@@ -1,1 +1,1 @@
-console.log('Cat 4 script, loaded with src');
+console.log('Category 4 -- loaded from src');
