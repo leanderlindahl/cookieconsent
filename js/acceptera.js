@@ -22,10 +22,14 @@
           return CustomEvent;
         })();
 
+  // This value will be read from a configuration file
+  // Some markets have {1: true}, others have {1: true, 2: true}
+  var defaultConsentStatus = { 1: true, 2: true };
+
   function setConsent(category) {
     var category = category || 1;
     var cookieConsentObject = (window.ikea || {}).cookieConsent || {
-      status: {},
+      status: defaultConsentStatus,
       statusStringified: JSON.stringify(this.status),
       hasConsent: function(consentCategory) {
         return this.status[consentCategory] || false;
@@ -34,10 +38,19 @@
     if (!cookieConsentObject.status.hasOwnProperty(category)) {
       cookieConsentObject.status[category] = true;
     }
-    // else {
-    //   delete cookieConsentObject.status[category];
-    // }
+    updateCookieConsent(cookieConsentObject);
+  }
 
+  function unsetConsent(category) {
+    if (!Boolean(window.ikea.cookieConsent)) {
+      return;
+    }
+    var cookieConsentObject = window.ikea.cookieConsent;
+    delete cookieConsentObject.status[category];
+    updateCookieConsent(cookieConsentObject);
+  }
+
+  function updateCookieConsent(cookieConsentObject) {
     cookieConsentObject.statusStringified = JSON.stringify(
       cookieConsentObject.status
     );
@@ -47,11 +60,12 @@
       detail: cookieConsentObject.status
     });
     console.log('consent status is now:', cookieConsentObject.status);
+
     // @TODO: write cookieConsentObject to a cookie
     document.dispatchEvent(cookieSettingsEvent);
   }
 
-  function loadScript(scriptTag) {
+  function invokeScript(scriptTag) {
     scriptTag.setAttribute('type', 'text/javascript');
     if (scriptTag.src) {
       // Create a new script tag
@@ -70,12 +84,12 @@
     }
   }
 
-  function enableConsentedScripts(cookieConsentObject) {
-    Object.keys(cookieConsentObject).forEach(function(item) {
+  function enableConsentedScripts(cookieConsentStatus) {
+    Object.keys(cookieConsentStatus).forEach(function(item) {
       var consentedScripts = document.querySelectorAll(
         'script[data-consent-category*="' + item + '"][type="text/plain"]'
       );
-      Array.prototype.forEach.call(consentedScripts, loadScript);
+      Array.prototype.forEach.call(consentedScripts, invokeScript);
     });
   }
 
@@ -88,14 +102,31 @@
   /**
    * Consent Settings Panel
    */
-  document.body.addEventListener('click', toggleConsentSettingsPanel);
-  function toggleConsentSettingsPanel(event) {
+  function toggleSettingsClickHandler(event) {
     if (event.target.className.indexOf('toggle-consent-settings') !== -1) {
-      document.querySelector('.modal').classList.toggle('visible');
-      document.querySelector('.modal-overlay').classList.toggle('visible');
+      toggleSettingsPanel();
     }
   }
-  document.body.addEventListener('click', consentToAll);
+  document.body.addEventListener('click', toggleSettingsClickHandler);
+
+  function toggleSettingsPanel() {
+    document.querySelector('.modal').classList.toggle('visible');
+    document.querySelector('.modal-overlay').classList.toggle('visible');
+    if (document.querySelector('.modal').className.indexOf('visible')) {
+      prepareSettingsPanel(window.ikea.cookieConsent.status);
+    }
+  }
+
+  function prepareSettingsPanel(consentStatus) {
+    console.log('prepareSettingsPanel');
+    var checkboxes = document.querySelectorAll(
+      '#acceptera-settings-panel input[type=checkbox]'
+    );
+    Array.prototype.forEach.call(checkboxes, function(checkbox) {
+      checkbox.checked = Boolean(consentStatus[checkbox.value]);
+    });
+  }
+
   function consentToAll(event) {
     if (event.target.id === 'acceptera-accept-all') {
       console.log('Accept all was clicked');
@@ -105,20 +136,24 @@
       Array.prototype.forEach.call(accepteraCategories, function(item) {
         setConsent(item.value);
       });
+      toggleSettingsPanel();
     }
   }
-  // document.body.addEventListener('click', consentToSelected);
-  // function consentToSelected(event) {
-  //   if (event.target.id === 'acceptera-save-settings') {
-  //     console.log('Save settings was clicked');
-  //     var accepteraCategories = document.querySelectorAll(
-  //       '#acceptera-settings-panel input[type=checkbox]'
-  //     );
-  //     Array.prototype.forEach.call(accepteraCategories, function(item) {
-  //       setConsent(item.value);
-  //     });
-  //   }
-  // }
+  document.body.addEventListener('click', consentToAll);
+
+  function consentToSelected(event) {
+    if (event.target.id === 'acceptera-save-settings') {
+      console.log('Save settings was clicked');
+      var accepteraCategories = document.querySelectorAll(
+        '#acceptera-settings-panel input[type=checkbox]'
+      );
+      Array.prototype.forEach.call(accepteraCategories, function(item) {
+        item.checked ? setConsent(item.value) : unsetConsent(item.value);
+      });
+      toggleSettingsPanel();
+    }
+  }
+  document.body.addEventListener('click', consentToSelected);
 
   /**
    * Mockup button events while developing,
