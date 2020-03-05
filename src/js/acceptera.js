@@ -172,6 +172,33 @@
 })(window, document);
 
 /**
+ * Mockup consent reporting in DOM
+ */
+function writeConsentToDom(event) {
+  var consentStatusObject = event.detail || { 1: true };
+  var targetElement = document.querySelector('.current-consent');
+  var targetChild = document.createElement('div');
+  var targetChildInnerHtml = `<div class="inner">
+    <h2>Strictly necessary: <span class="${
+      Boolean(consentStatusObject[1]) ? 'green' : 'red'
+    }">${Boolean(consentStatusObject[1])}</span></h2>
+    <h2>Performance: <span class="${
+      Boolean(consentStatusObject[2]) ? 'green' : 'red'
+    }">${Boolean(consentStatusObject[2])}</span></h2>
+    <h2>Functional: <span class="${
+      Boolean(consentStatusObject[3]) ? 'green' : 'red'
+    }">${Boolean(consentStatusObject[3])}</span></h2>
+    <h2>Targeting: <span class="${
+      Boolean(consentStatusObject[4]) ? 'green' : 'red'
+    }">${Boolean(consentStatusObject[4])}</span></h2>
+    </div>
+  `;
+  targetChild.innerHTML = targetChildInnerHtml;
+  targetElement.replaceChild(targetChild, targetElement.firstChild);
+}
+document.addEventListener('ikeaCookieConsent', writeConsentToDom);
+
+/**
  * References:
  * https://css-tricks.com/considerations-styling-modal/
  */
